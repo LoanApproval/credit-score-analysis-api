@@ -2,7 +2,7 @@
 import { AnalysisResult, LoanApplication, PredictionResponse } from "@/types";
 
 // Replace with your actual API URL
-const API_BASE_URL = "http://localhost:8080";
+const API_BASE_URL = "https://fast-api-production-1346.up.railway.app";
 
 export async function predictSingleLoan(loanData: LoanApplication): Promise<PredictionResponse> {
   // Create a FormData with a single row CSV
