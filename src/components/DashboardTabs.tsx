@@ -31,9 +31,9 @@ const DashboardTabs: React.FC<DashboardTabsProps> = ({
   return (
     <Tabs defaultValue="single" className="w-full">
       <TabsList className="grid w-full grid-cols-3">
-        <TabsTrigger value="single">ใบสมัครเดี่ยว</TabsTrigger>
-        <TabsTrigger value="batch">การประมวลผลแบทช์</TabsTrigger>
-        <TabsTrigger value="analytics">การวิเคราะห์</TabsTrigger>
+        <TabsTrigger value="single">Single Application</TabsTrigger>
+        <TabsTrigger value="batch">Batch Processing</TabsTrigger>
+        <TabsTrigger value="analytics">Analytics</TabsTrigger>
       </TabsList>
 
       {/* Single Application Tab */}
@@ -83,9 +83,9 @@ const DashboardTabs: React.FC<DashboardTabsProps> = ({
               accept=".csv"
             />
             <div className="p-8 text-center bg-muted rounded-lg">
-              <h3 className="text-lg font-medium mb-2">ไม่มีข้อมูลการวิเคราะห์</h3>
+              <h3 className="text-lg font-medium mb-2">No analysis data</h3>
               <p className="text-muted-foreground">
-                อัพโหลดไฟล์ CSV เพื่อดูการวิเคราะห์และแผนภาพ
+                Upload a CSV file to view analytics and charts
               </p>
             </div>
           </div>

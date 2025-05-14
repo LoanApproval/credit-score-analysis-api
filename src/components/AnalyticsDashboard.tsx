@@ -29,9 +29,9 @@ interface AnalyticsDashboardProps {
 const COLORS = ["#0088FE", "#FF8042"];
 
 const formatCurrency = (amount: number) => {
-  return new Intl.NumberFormat("th-TH", {
+  return new Intl.NumberFormat("en-US", {
     style: "currency",
-    currency: "THB",
+    currency: "USD",
     minimumFractionDigits: 0,
     maximumFractionDigits: 0,
   }).format(amount);
@@ -44,56 +44,56 @@ const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
     return (
       <div className="text-center py-10">
         <p className="text-lg text-muted-foreground">
-          อัพโหลดข้อมูลเพื่อดูการวิเคราะห์
+          Upload data to view analytics
         </p>
       </div>
     );
   }
 
-  // Prepare data for home ownership chart
-  const homeOwnershipData = Object.entries(analysisData.approval_by_ownership).map(
+  // Prepare data for home ownership chart - ensure all required properties exist
+  const homeOwnershipData = Object.entries(analysisData.approval_by_ownership || {}).map(
     ([ownership, rates]) => ({
-      name: ownership === 'own' ? 'เจ้าของบ้าน' : 
-            ownership === 'rent' ? 'เช่า' : 
-            ownership === 'mortgage' ? 'จำนอง' : 'อื่นๆ',
-      approved: rates.Approved,
-      declined: rates.Declined,
+      name: ownership === 'own' ? 'Own' : 
+            ownership === 'rent' ? 'Rent' : 
+            ownership === 'mortgage' ? 'Mortgage' : 'Other',
+      approved: rates.Approved || 0,
+      declined: rates.Declined || 0,
     })
   );
 
   // Prepare data for previous defaults chart
-  const defaultsData = Object.entries(analysisData.approval_by_defaults).map(
+  const defaultsData = Object.entries(analysisData.approval_by_defaults || {}).map(
     ([defaultStatus, rates]) => ({
-      name: defaultStatus === 'yes' ? 'มี' : 'ไม่มี',
-      approved: rates.Approved,
-      declined: rates.Declined,
+      name: defaultStatus === 'yes' ? 'Yes' : 'No',
+      approved: rates.Approved || 0,
+      declined: rates.Declined || 0,
     })
   );
 
   // Prepare data for pie chart
   const pieData = [
-    { name: "อนุมัติ", value: (analysisData.approval_rate / 100) * analysisData.total_applications },
+    { name: "Approved", value: (analysisData.approval_rate / 100) * analysisData.total_applications },
     {
-      name: "ปฏิเสธ",
+      name: "Declined",
       value:
         ((100 - analysisData.approval_rate) / 100) * analysisData.total_applications,
     },
   ];
 
   // Prepare data for credit score chart
-  const creditScoreData = analysisData.credit_score_bins.labels.map((label, index) => ({
+  const creditScoreData = analysisData.credit_score_bins?.labels?.map((label, index) => ({
     name: label,
-    approved: analysisData.credit_score_bins.approved[index],
-    declined: analysisData.credit_score_bins.declined[index],
-  }));
+    approved: analysisData.credit_score_bins.approved?.[index] || 0,
+    declined: analysisData.credit_score_bins.declined?.[index] || 0,
+  })) || [];
 
   return (
     <div className="grid gap-6 md:grid-cols-2">
       <Card className="dashboard-card">
         <CardHeader>
-          <CardTitle>อัตราการอนุมัติ</CardTitle>
+          <CardTitle>Approval Rate</CardTitle>
           <CardDescription>
-            อัตราการอนุมัติสินเชื่อทั้งหมด: {analysisData.approval_rate}%
+            Overall loan approval rate: {analysisData.approval_rate}%
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -123,9 +123,9 @@ const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
 
       <Card className="dashboard-card">
         <CardHeader>
-          <CardTitle>ผลกระทบจากสถานะที่อยู่</CardTitle>
+          <CardTitle>Home Ownership Impact</CardTitle>
           <CardDescription>
-            อัตราการอนุมัติตามสถานะที่อยู่อาศัย
+            Approval rates by home ownership status
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -136,8 +136,8 @@ const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
               <YAxis tickFormatter={(value) => `${value}%`} />
               <Tooltip formatter={(value) => `${Number(value).toFixed(1)}%`} />
               <Legend />
-              <Bar dataKey="approved" name="อนุมัติ" fill="#0088FE" />
-              <Bar dataKey="declined" name="ปฏิเสธ" fill="#FF8042" />
+              <Bar dataKey="approved" name="Approved" fill="#0088FE" />
+              <Bar dataKey="declined" name="Declined" fill="#FF8042" />
             </BarChart>
           </ResponsiveContainer>
         </CardContent>
@@ -145,9 +145,9 @@ const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
 
       <Card className="dashboard-card">
         <CardHeader>
-          <CardTitle>ผลกระทบจากประวัติผิดนัด</CardTitle>
+          <CardTitle>Previous Defaults Impact</CardTitle>
           <CardDescription>
-            อัตราการอนุมัติตามสถานะการผิดนัดชำระ
+            Approval rates by previous defaults status
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -158,8 +158,8 @@ const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
               <YAxis tickFormatter={(value) => `${value}%`} />
               <Tooltip formatter={(value) => `${Number(value).toFixed(1)}%`} />
               <Legend />
-              <Bar dataKey="approved" name="อนุมัติ" fill="#0088FE" />
-              <Bar dataKey="declined" name="ปฏิเสธ" fill="#FF8042" />
+              <Bar dataKey="approved" name="Approved" fill="#0088FE" />
+              <Bar dataKey="declined" name="Declined" fill="#FF8042" />
             </BarChart>
           </ResponsiveContainer>
         </CardContent>
@@ -167,9 +167,9 @@ const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
 
       <Card className="dashboard-card">
         <CardHeader>
-          <CardTitle>การกระจายตัวของคะแนนเครดิต</CardTitle>
+          <CardTitle>Credit Score Distribution</CardTitle>
           <CardDescription>
-            อัตราการอนุมัติตามช่วงคะแนนเครดิต
+            Approval rates by credit score range
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -180,8 +180,8 @@ const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
               <YAxis />
               <Tooltip />
               <Legend />
-              <Bar dataKey="approved" name="อนุมัติ" fill="#0088FE" />
-              <Bar dataKey="declined" name="ปฏิเสธ" fill="#FF8042" />
+              <Bar dataKey="approved" name="Approved" fill="#0088FE" />
+              <Bar dataKey="declined" name="Declined" fill="#FF8042" />
             </BarChart>
           </ResponsiveContainer>
         </CardContent>

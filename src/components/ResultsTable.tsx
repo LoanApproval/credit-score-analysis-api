@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useState } from "react";
 import {
   Table,
   TableBody,
@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, ArrowDown, ArrowUp } from "lucide-react";
 import { LoanPrediction } from "@/types";
 
 interface ResultsTableProps {
@@ -25,9 +25,9 @@ interface ResultsTableProps {
 }
 
 const formatCurrency = (amount: number) => {
-  return new Intl.NumberFormat("th-TH", {
+  return new Intl.NumberFormat("en-US", {
     style: "currency",
-    currency: "THB",
+    currency: "USD",
     minimumFractionDigits: 0,
     maximumFractionDigits: 0,
   }).format(amount);
@@ -39,11 +39,42 @@ const ResultsTable: React.FC<ResultsTableProps> = ({
   onPageChange,
 }) => {
   const { page, total_pages, total_items } = pagination;
+  const [sortField, setSortField] = useState<string | null>(null);
+  const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
+  
+  // Sort results based on current sorting criteria
+  const sortedResults = [...results].sort((a, b) => {
+    if (!sortField) return 0;
+    
+    const fieldA = a[sortField as keyof LoanPrediction];
+    const fieldB = b[sortField as keyof LoanPrediction];
+    
+    if (fieldA < fieldB) return sortDirection === "asc" ? -1 : 1;
+    if (fieldA > fieldB) return sortDirection === "asc" ? 1 : -1;
+    return 0;
+  });
+  
+  const handleSort = (field: string) => {
+    if (sortField === field) {
+      setSortDirection(sortDirection === "asc" ? "desc" : "asc");
+    } else {
+      setSortField(field);
+      setSortDirection("asc");
+    }
+  };
+  
+  const SortIndicator = ({ field }: { field: string }) => {
+    if (sortField !== field) return null;
+    
+    return sortDirection === "asc" ? 
+      <ArrowUp className="ml-1 h-4 w-4 inline" /> : 
+      <ArrowDown className="ml-1 h-4 w-4 inline" />;
+  };
   
   if (results.length === 0) {
     return (
       <div className="rounded-lg border bg-card p-8 text-center">
-        <p className="text-muted-foreground">ไม่มีผลลัพธ์</p>
+        <p className="text-muted-foreground">No results available</p>
       </div>
     );
   }
@@ -54,18 +85,34 @@ const ResultsTable: React.FC<ResultsTableProps> = ({
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>อายุ</TableHead>
-              <TableHead>รายได้</TableHead>
-              <TableHead>วงเงินกู้</TableHead>
-              <TableHead>คะแนนเครดิต</TableHead>
-              <TableHead>ประวัติผิดนัด</TableHead>
-              <TableHead>สถานะที่อยู่</TableHead>
-              <TableHead>ผลลัพธ์</TableHead>
-              <TableHead>ความน่าจะเป็น</TableHead>
+              <TableHead onClick={() => handleSort("age")} className="cursor-pointer">
+                Age <SortIndicator field="age" />
+              </TableHead>
+              <TableHead onClick={() => handleSort("income")} className="cursor-pointer">
+                Income <SortIndicator field="income" />
+              </TableHead>
+              <TableHead onClick={() => handleSort("loan_amount")} className="cursor-pointer">
+                Loan Amount <SortIndicator field="loan_amount" />
+              </TableHead>
+              <TableHead onClick={() => handleSort("credit_score")} className="cursor-pointer">
+                Credit Score <SortIndicator field="credit_score" />
+              </TableHead>
+              <TableHead onClick={() => handleSort("previous_defaults")} className="cursor-pointer">
+                Previous Defaults <SortIndicator field="previous_defaults" />
+              </TableHead>
+              <TableHead onClick={() => handleSort("home_ownership")} className="cursor-pointer">
+                Home Ownership <SortIndicator field="home_ownership" />
+              </TableHead>
+              <TableHead onClick={() => handleSort("result")} className="cursor-pointer">
+                Result <SortIndicator field="result" />
+              </TableHead>
+              <TableHead onClick={() => handleSort("approval_probability")} className="cursor-pointer">
+                Probability <SortIndicator field="approval_probability" />
+              </TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {results.map((result, index) => (
+            {sortedResults.map((result, index) => (
               <TableRow key={index}>
                 <TableCell>{result.age}</TableCell>
                 <TableCell>{formatCurrency(result.income)}</TableCell>
@@ -75,21 +122,21 @@ const ResultsTable: React.FC<ResultsTableProps> = ({
                   <Badge
                     variant={result.previous_defaults === "yes" ? "destructive" : "outline"}
                   >
-                    {result.previous_defaults === "yes" ? "มี" : "ไม่มี"}
+                    {result.previous_defaults === "yes" ? "Yes" : "No"}
                   </Badge>
                 </TableCell>
                 <TableCell>
                   <Badge variant="secondary">
-                    {result.home_ownership === "own" ? "เจ้าของบ้าน" : 
-                     result.home_ownership === "rent" ? "เช่า" : 
-                     result.home_ownership === "mortgage" ? "จำนอง" : "อื่นๆ"}
+                    {result.home_ownership === "own" ? "Own" : 
+                     result.home_ownership === "rent" ? "Rent" : 
+                     result.home_ownership === "mortgage" ? "Mortgage" : "Other"}
                   </Badge>
                 </TableCell>
                 <TableCell>
                   <Badge
                     variant={result.result === "Approved" ? "success" : "destructive"}
                   >
-                    {result.result === "Approved" ? "อนุมัติ" : "ปฏิเสธ"}
+                    {result.result === "Approved" ? "Approved" : "Declined"}
                   </Badge>
                 </TableCell>
                 <TableCell>
@@ -113,7 +160,7 @@ const ResultsTable: React.FC<ResultsTableProps> = ({
 
       <div className="flex items-center justify-between">
         <p className="text-sm text-muted-foreground">
-          แสดงผลลัพธ์ {((page - 1) * pagination.page_size) + 1} ถึง {Math.min(page * pagination.page_size, total_items)} จาก {total_items} รายการ
+          Showing results {((page - 1) * pagination.page_size) + 1} to {Math.min(page * pagination.page_size, total_items)} of {total_items} entries
         </p>
         <div className="flex gap-1">
           <Button
@@ -123,7 +170,7 @@ const ResultsTable: React.FC<ResultsTableProps> = ({
             disabled={page <= 1}
           >
             <ChevronLeft className="h-4 w-4" />
-            ก่อนหน้า
+            Previous
           </Button>
           <Button
             variant="outline"
@@ -131,7 +178,7 @@ const ResultsTable: React.FC<ResultsTableProps> = ({
             onClick={() => onPageChange(page + 1)}
             disabled={page >= total_pages}
           >
-            ถัดไป
+            Next
             <ChevronRight className="h-4 w-4" />
           </Button>
         </div>

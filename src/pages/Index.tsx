@@ -19,10 +19,10 @@ const Index: React.FC = () => {
     try {
       const results = await predictSingleLoan(data);
       setPredictionResults(results);
-      toast.success("การทำนายเสร็จสมบูรณ์!");
+      toast.success("Prediction completed successfully!");
     } catch (error) {
       console.error("Prediction error:", error);
-      toast.error(error instanceof Error ? error.message : "เกิดข้อผิดพลาดในการประมวลผลใบสมัครสินเชื่อ");
+      toast.error(error instanceof Error ? error.message : "Error processing loan application");
     } finally {
       setIsLoadingPrediction(false);
     }
@@ -35,10 +35,10 @@ const Index: React.FC = () => {
     try {
       const results = await uploadCSVForPrediction(file, 1);
       setPredictionResults(results);
-      toast.success("ประมวลผลไฟล์ CSV เสร็จสมบูรณ์!");
+      toast.success("CSV file processed successfully!");
     } catch (error) {
       console.error("File upload error:", error);
-      toast.error(error instanceof Error ? error.message : "เกิดข้อผิดพลาดในการประมวลผลไฟล์ CSV");
+      toast.error(error instanceof Error ? error.message : "Error processing CSV file");
     } finally {
       setIsLoadingPrediction(false);
     }
@@ -49,10 +49,10 @@ const Index: React.FC = () => {
     try {
       const results = await analyzeCSV(file);
       setAnalysisResults(results);
-      toast.success("การวิเคราะห์เสร็จสมบูรณ์!");
+      toast.success("Analysis completed successfully!");
     } catch (error) {
       console.error("Analysis error:", error);
-      toast.error(error instanceof Error ? error.message : "เกิดข้อผิดพลาดในการวิเคราะห์ไฟล์ CSV");
+      toast.error(error instanceof Error ? error.message : "Error analyzing CSV file");
     } finally {
       setIsLoadingAnalysis(false);
     }
@@ -67,7 +67,7 @@ const Index: React.FC = () => {
         setPredictionResults(results);
       } catch (error) {
         console.error("Pagination error:", error);
-        toast.error(error instanceof Error ? error.message : "เกิดข้อผิดพลาดในการโหลดข้อมูลหน้า");
+        toast.error(error instanceof Error ? error.message : "Error loading page data");
       } finally {
         setIsLoadingPrediction(false);
       }
@@ -79,9 +79,9 @@ const Index: React.FC = () => {
       <Header />
       <div className="flex-1 container py-8">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold mb-2">แดชบอร์ดอนุมัติสินเชื่อ</h1>
+          <h1 className="text-3xl font-bold mb-2">Loan Approval Dashboard</h1>
           <p className="text-muted-foreground">
-            วิเคราะห์และทำนายการอนุมัติสินเชื่อโดยใช้โมเดลเรียนรู้ของเรา
+            Analyze and predict loan approvals using our machine learning model
           </p>
         </div>
 
@@ -98,7 +98,7 @@ const Index: React.FC = () => {
       </div>
       <footer className="border-t py-6 bg-white">
         <div className="container text-center text-muted-foreground text-sm">
-          © {new Date().getFullYear()} แดชบอร์ดอนุมัติสินเชื่อ สงวนลิขสิทธิ์
+          © {new Date().getFullYear()} Loan Approval Dashboard. All rights reserved.
         </div>
       </footer>
     </div>
