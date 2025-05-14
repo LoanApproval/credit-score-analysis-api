@@ -11,10 +11,10 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { LoanResult } from "@/types";
+import { LoanPrediction } from "@/types";
 
 interface ResultsTableProps {
-  results: LoanResult[];
+  results: LoanPrediction[];
   pagination: {
     page: number;
     page_size: number;
@@ -25,9 +25,9 @@ interface ResultsTableProps {
 }
 
 const formatCurrency = (amount: number) => {
-  return new Intl.NumberFormat("en-US", {
+  return new Intl.NumberFormat("th-TH", {
     style: "currency",
-    currency: "USD",
+    currency: "THB",
     minimumFractionDigits: 0,
     maximumFractionDigits: 0,
   }).format(amount);
@@ -43,7 +43,7 @@ const ResultsTable: React.FC<ResultsTableProps> = ({
   if (results.length === 0) {
     return (
       <div className="rounded-lg border bg-card p-8 text-center">
-        <p className="text-muted-foreground">No results to display.</p>
+        <p className="text-muted-foreground">ไม่มีผลลัพธ์</p>
       </div>
     );
   }
@@ -54,14 +54,14 @@ const ResultsTable: React.FC<ResultsTableProps> = ({
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Age</TableHead>
-              <TableHead>Income</TableHead>
-              <TableHead>Loan Amount</TableHead>
-              <TableHead>Credit Score</TableHead>
-              <TableHead>Previous Defaults</TableHead>
-              <TableHead>Home Ownership</TableHead>
-              <TableHead>Result</TableHead>
-              <TableHead>Probability</TableHead>
+              <TableHead>อายุ</TableHead>
+              <TableHead>รายได้</TableHead>
+              <TableHead>วงเงินกู้</TableHead>
+              <TableHead>คะแนนเครดิต</TableHead>
+              <TableHead>ประวัติผิดนัด</TableHead>
+              <TableHead>สถานะที่อยู่</TableHead>
+              <TableHead>ผลลัพธ์</TableHead>
+              <TableHead>ความน่าจะเป็น</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -75,17 +75,21 @@ const ResultsTable: React.FC<ResultsTableProps> = ({
                   <Badge
                     variant={result.previous_defaults === "yes" ? "destructive" : "outline"}
                   >
-                    {result.previous_defaults}
+                    {result.previous_defaults === "yes" ? "มี" : "ไม่มี"}
                   </Badge>
                 </TableCell>
                 <TableCell>
-                  <Badge variant="secondary">{result.home_ownership}</Badge>
+                  <Badge variant="secondary">
+                    {result.home_ownership === "own" ? "เจ้าของบ้าน" : 
+                     result.home_ownership === "rent" ? "เช่า" : 
+                     result.home_ownership === "mortgage" ? "จำนอง" : "อื่นๆ"}
+                  </Badge>
                 </TableCell>
                 <TableCell>
                   <Badge
                     variant={result.result === "Approved" ? "success" : "destructive"}
                   >
-                    {result.result}
+                    {result.result === "Approved" ? "อนุมัติ" : "ปฏิเสธ"}
                   </Badge>
                 </TableCell>
                 <TableCell>
@@ -109,7 +113,7 @@ const ResultsTable: React.FC<ResultsTableProps> = ({
 
       <div className="flex items-center justify-between">
         <p className="text-sm text-muted-foreground">
-          Showing results {((page - 1) * pagination.page_size) + 1} to {Math.min(page * pagination.page_size, total_items)} of {total_items}
+          แสดงผลลัพธ์ {((page - 1) * pagination.page_size) + 1} ถึง {Math.min(page * pagination.page_size, total_items)} จาก {total_items} รายการ
         </p>
         <div className="flex gap-1">
           <Button
@@ -119,7 +123,7 @@ const ResultsTable: React.FC<ResultsTableProps> = ({
             disabled={page <= 1}
           >
             <ChevronLeft className="h-4 w-4" />
-            Previous
+            ก่อนหน้า
           </Button>
           <Button
             variant="outline"
@@ -127,7 +131,7 @@ const ResultsTable: React.FC<ResultsTableProps> = ({
             onClick={() => onPageChange(page + 1)}
             disabled={page >= total_pages}
           >
-            Next
+            ถัดไป
             <ChevronRight className="h-4 w-4" />
           </Button>
         </div>
