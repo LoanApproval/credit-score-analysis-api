@@ -1,10 +1,6 @@
 
-import React from "react";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
-import { LoanApplication } from "@/types";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Form,
   FormControl,
@@ -22,7 +18,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { LoanApplication } from "@/types";
+import { zodResolver } from "@hookform/resolvers/zod";
+import React from "react";
+import { useForm } from "react-hook-form";
+import * as z from "zod";
 
 interface LoanApplicationFormProps {
   onSubmit: (data: LoanApplication) => void;
@@ -38,10 +38,10 @@ const formSchema = z.object({
     .number()
     .positive("Loan amount must be greater than 0")
     .max(1000000, "Loan amount must be less than 1,000,000"),
-  credit_score: z.coerce
+  loan_int_rate: z.coerce
     .number()
-    .min(300, "Credit score must be at least 300")
-    .max(850, "Credit score must be at most 850"),
+    .min(5, "Loan Interest Rate must be at least 300")
+    .max(20, "Loan Interest Rate must be at most 850"),
   age: z.coerce
     .number()
     .int("Age must be a whole number")
@@ -64,7 +64,7 @@ const LoanApplicationForm: React.FC<LoanApplicationFormProps> = ({
     defaultValues: {
       income: undefined,
       loan_amount: undefined,
-      credit_score: undefined,
+      loan_int_rate: undefined,
       age: undefined,
       previous_defaults: undefined,
       home_ownership: undefined,
@@ -131,16 +131,16 @@ const LoanApplicationForm: React.FC<LoanApplicationFormProps> = ({
 
               <FormField
                 control={form.control}
-                name="credit_score"
+                name="loan_int_rate"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Credit Score</FormLabel>
+                    <FormLabel>Loan Interest Rate</FormLabel>
                     <FormControl>
                       <Input
                         type="number"
-                        placeholder="e.g., 720"
-                        min={300}
-                        max={850}
+                        placeholder="e.g., 5"
+                        min={5}
+                        max={20}
                         {...field}
                       />
                     </FormControl>

@@ -1,5 +1,5 @@
 
-import { LoanApplication, PredictionResponse, AnalysisResult } from "@/types";
+import { AnalysisResult, LoanApplication, PredictionResponse } from "@/types";
 
 // Replace with your actual API URL
 const API_BASE_URL = "http://localhost:8080";
@@ -9,11 +9,11 @@ export async function predictSingleLoan(loanData: LoanApplication): Promise<Pred
   const formData = new FormData();
   
   // Create CSV header and data row
-  const headers = ["income", "loan_amount", "credit_score", "age", "previous_defaults", "home_ownership"];
+  const headers = ["income", "loan_amount", "loan_int_rate", "age", "previous_defaults", "home_ownership"];
   const row = [
     loanData.income,
     loanData.loan_amount,
-    loanData.credit_score,
+    loanData.loan_int_rate,
     loanData.age,
     loanData.previous_defaults,
     loanData.home_ownership

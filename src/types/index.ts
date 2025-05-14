@@ -2,7 +2,8 @@
 export interface LoanApplication {
   income: number;
   loan_amount: number;
-  credit_score: number;
+  loan_int_rate: number;
+  loan_percent_income: number;
   age: number;
   previous_defaults: string;
   home_ownership: string;

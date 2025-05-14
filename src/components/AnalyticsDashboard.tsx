@@ -1,5 +1,4 @@
 
-import React from "react";
 import {
   Card,
   CardContent,
@@ -7,20 +6,21 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { AnalysisResult } from "@/types";
+import React from "react";
 import {
-  ResponsiveContainer,
-  BarChart,
   Bar,
+  BarChart,
+  CartesianGrid,
+  Cell,
+  Legend,
+  Pie,
+  PieChart,
+  ResponsiveContainer,
+  Tooltip,
   XAxis,
   YAxis,
-  CartesianGrid,
-  Tooltip,
-  Legend,
-  PieChart,
-  Pie,
-  Cell,
 } from "recharts";
-import { AnalysisResult } from "@/types";
 
 interface AnalyticsDashboardProps {
   analysisData: AnalysisResult;
@@ -80,7 +80,7 @@ const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
     },
   ];
 
-  // Prepare data for credit score chart
+  // Prepare data for Loan Interest Rate chart
   const creditScoreData = analysisData.credit_score_bins?.labels?.map((label, index) => ({
     name: label,
     approved: analysisData.credit_score_bins.approved?.[index] || 0,
@@ -133,8 +133,8 @@ const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
             <BarChart data={homeOwnershipData}>
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="name" />
-              <YAxis tickFormatter={(value) => `${value}%`} />
-              <Tooltip formatter={(value) => `${Number(value).toFixed(1)}%`} />
+              <YAxis tickFormatter={(value) => `${value*100}%`} />
+              <Tooltip formatter={(value) => `${(Number(value)*100).toFixed(1)}%`} />
               <Legend />
               <Bar dataKey="approved" name="Approved" fill="#0088FE" />
               <Bar dataKey="declined" name="Declined" fill="#FF8042" />
@@ -155,8 +155,8 @@ const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
             <BarChart data={defaultsData}>
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="name" />
-              <YAxis tickFormatter={(value) => `${value}%`} />
-              <Tooltip formatter={(value) => `${Number(value).toFixed(1)}%`} />
+              <YAxis tickFormatter={(value) => `${value*100}%`} />
+              <Tooltip formatter={(value) => `${(Number(value)*100).toFixed(1)}%`} />
               <Legend />
               <Bar dataKey="approved" name="Approved" fill="#0088FE" />
               <Bar dataKey="declined" name="Declined" fill="#FF8042" />
@@ -165,11 +165,11 @@ const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
         </CardContent>
       </Card>
 
-      <Card className="dashboard-card">
+      {/* <Card className="dashboard-card">
         <CardHeader>
-          <CardTitle>Credit Score Distribution</CardTitle>
+          <CardTitle>Loan Interest Rate Distribution</CardTitle>
           <CardDescription>
-            Approval rates by credit score range
+            Approval rates by loan int rate range
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -185,7 +185,7 @@ const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
             </BarChart>
           </ResponsiveContainer>
         </CardContent>
-      </Card>
+      </Card> */}
     </div>
   );
 };

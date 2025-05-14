@@ -1,11 +1,10 @@
 
-import React from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import LoanApplicationForm from "./LoanApplicationForm";
+import { AnalysisResult, LoanApplication, PredictionResponse } from "@/types";
+import React from "react";
+import AnalyticsDashboard from "./AnalyticsDashboard";
 import FileUpload from "./FileUpload";
 import ResultsTable from "./ResultsTable";
-import AnalyticsDashboard from "./AnalyticsDashboard";
-import { LoanApplication, PredictionResponse, AnalysisResult } from "@/types";
 
 interface DashboardTabsProps {
   onSubmitSingleApplication: (data: LoanApplication) => void;
@@ -29,15 +28,15 @@ const DashboardTabs: React.FC<DashboardTabsProps> = ({
   isLoadingAnalysis,
 }) => {
   return (
-    <Tabs defaultValue="single" className="w-full">
-      <TabsList className="grid w-full grid-cols-3">
-        <TabsTrigger value="single">Single Application</TabsTrigger>
+    <Tabs defaultValue="batch" className="w-full">
+      <TabsList className="grid w-full grid-cols-2">
+        {/* <TabsTrigger value="single">Single Application</TabsTrigger> */}
         <TabsTrigger value="batch">Batch Processing</TabsTrigger>
         <TabsTrigger value="analytics">Analytics</TabsTrigger>
       </TabsList>
 
       {/* Single Application Tab */}
-      <TabsContent value="single" className="space-y-6">
+      {/* <TabsContent value="single" className="space-y-6">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <LoanApplicationForm
             onSubmit={onSubmitSingleApplication}
@@ -51,7 +50,7 @@ const DashboardTabs: React.FC<DashboardTabsProps> = ({
             />
           )}
         </div>
-      </TabsContent>
+      </TabsContent> */}
 
       {/* Batch Processing Tab */}
       <TabsContent value="batch" className="space-y-6">

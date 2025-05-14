@@ -1,5 +1,6 @@
 
-import React, { useState } from "react";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
   Table,
   TableBody,
@@ -8,10 +9,9 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { ChevronLeft, ChevronRight, ArrowDown, ArrowUp } from "lucide-react";
 import { LoanPrediction } from "@/types";
+import { ArrowDown, ArrowUp, ChevronLeft, ChevronRight } from "lucide-react";
+import React, { useState } from "react";
 
 interface ResultsTableProps {
   results: LoanPrediction[];
@@ -94,8 +94,11 @@ const ResultsTable: React.FC<ResultsTableProps> = ({
               <TableHead onClick={() => handleSort("loan_amount")} className="cursor-pointer">
                 Loan Amount <SortIndicator field="loan_amount" />
               </TableHead>
-              <TableHead onClick={() => handleSort("credit_score")} className="cursor-pointer">
-                Credit Score <SortIndicator field="credit_score" />
+              <TableHead onClick={() => handleSort("loan_int_rate")} className="cursor-pointer">
+                Loan Interest Rate <SortIndicator field="loan_int_rate" />
+              </TableHead>
+              <TableHead onClick={() => handleSort("loadn_percent_income")} className="cursor-pointer">
+                Loan Percent Income <SortIndicator field="loadn_percent_income" />
               </TableHead>
               <TableHead onClick={() => handleSort("previous_defaults")} className="cursor-pointer">
                 Previous Defaults <SortIndicator field="previous_defaults" />
@@ -117,7 +120,8 @@ const ResultsTable: React.FC<ResultsTableProps> = ({
                 <TableCell>{result.age}</TableCell>
                 <TableCell>{formatCurrency(result.income)}</TableCell>
                 <TableCell>{formatCurrency(result.loan_amount)}</TableCell>
-                <TableCell>{result.credit_score}</TableCell>
+                <TableCell>{result.loan_int_rate}%</TableCell>
+                <TableCell>{result.loan_percent_income*100}%</TableCell>
                 <TableCell>
                   <Badge
                     variant={result.previous_defaults === "yes" ? "destructive" : "outline"}
@@ -148,7 +152,7 @@ const ResultsTable: React.FC<ResultsTableProps> = ({
                       ></div>
                     </div>
                     <span className="text-xs">
-                      {result.approval_probability}%
+                      {result.approval_probability.toFixed(2)}%
                     </span>
                   </div>
                 </TableCell>
