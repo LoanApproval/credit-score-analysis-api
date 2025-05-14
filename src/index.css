@@ -91,7 +91,7 @@
 
 /* Custom loading animation */
 .loading-dot {
-  @apply inline-block h-2 w-2 rounded-full bg-primary;
+  @apply inline-block size-2 rounded-full bg-primary;
   animation: loading 1.4s infinite ease-in-out both;
 }
 

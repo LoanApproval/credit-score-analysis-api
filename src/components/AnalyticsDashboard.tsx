@@ -1,243 +1,198 @@
 
 import React from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { AnalysisResult } from "@/types";
 import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  ResponsiveContainer,
   BarChart,
   Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
   PieChart,
   Pie,
   Cell,
-  ResponsiveContainer,
-  XAxis,
-  YAxis,
-  Tooltip,
-  Legend,
 } from "recharts";
+import { AnalysisResult } from "@/types";
 
 interface AnalyticsDashboardProps {
-  analysisData: AnalysisResult;
+  data: AnalysisResult | null;
+  isLoading: boolean;
 }
 
+const COLORS = ["#0088FE", "#FF8042"];
+
 const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
-  analysisData,
+  data,
+  isLoading,
 }) => {
-  // Colors for charts
-  const COLORS = {
-    approved: "#10b981", // success/green
-    declined: "#ef4444", // destructive/red
-    blue: "#3b82f6",
-    purple: "#8b5cf6",
-    orange: "#f97316",
-    yellow: "#eab308",
-  };
+  if (isLoading) {
+    return (
+      <div className="grid gap-6 md:grid-cols-2">
+        {[1, 2, 3, 4].map((i) => (
+          <Card key={i} className="animate-pulse">
+            <CardHeader>
+              <div className="h-5 w-3/4 rounded-md bg-muted"></div>
+              <div className="h-4 w-1/2 rounded-md bg-muted"></div>
+            </CardHeader>
+            <CardContent>
+              <div className="h-[200px] rounded-md bg-muted"></div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+    );
+  }
 
-  // Format numbers with commas for thousands
-  const formatNumber = (num: number) => {
-    return num.toLocaleString("en-US");
-  };
+  if (!data) {
+    return (
+      <div className="text-center py-10">
+        <p className="text-lg text-muted-foreground">
+          Upload data to see analytics
+        </p>
+      </div>
+    );
+  }
 
-  // Prepare data for pie charts
-  const prepareOwnershipData = () => {
-    const { approval_by_ownership } = analysisData;
-    return Object.entries(approval_by_ownership).map(([key, value]) => ({
-      name: key.charAt(0).toUpperCase() + key.slice(1),
-      value: value["Approved"] || 0,
-      total: 100,
-    }));
-  };
+  // Prepare data for home ownership chart
+  const homeOwnershipData = Object.entries(data.approval_by_ownership).map(
+    ([ownership, rates]) => ({
+      name: ownership,
+      approved: rates.Approved,
+      declined: rates.Declined,
+    })
+  );
+
+  // Prepare data for previous defaults chart
+  const defaultsData = Object.entries(data.approval_by_defaults).map(
+    ([defaultStatus, rates]) => ({
+      name: defaultStatus,
+      approved: rates.Approved,
+      declined: rates.Declined,
+    })
+  );
+
+  // Prepare data for pie chart
+  const pieData = [
+    { name: "Approved", value: (data.approval_rate / 100) * data.total_applications },
+    {
+      name: "Declined",
+      value:
+        ((100 - data.approval_rate) / 100) * data.total_applications,
+    },
+  ];
 
   // Prepare data for credit score chart
-  const prepareCreditScoreData = () => {
-    const { credit_score_bins } = analysisData;
-    return credit_score_bins.labels.map((label, index) => ({
-      name: label,
-      Approved: credit_score_bins.approved[index],
-      Declined: credit_score_bins.declined[index],
-    }));
-  };
-
-  // Calculate stats for dashboard cards
-  const getAverageIncome = () => {
-    const approved = analysisData.income_distribution.approved;
-    return approved && approved.mean ? approved.mean : 0;
-  };
-
-  const getAverageLoanAmount = () => {
-    const approved = analysisData.loan_amount_distribution.approved;
-    return approved && approved.mean ? approved.mean : 0;
-  };
+  const creditScoreData = data.credit_score_bins.labels.map((label, index) => ({
+    name: label,
+    approved: data.credit_score_bins.approved[index],
+    declined: data.credit_score_bins.declined[index],
+  }));
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-      {/* Summary Cards */}
+    <div className="grid gap-6 md:grid-cols-2">
       <Card className="dashboard-card">
-        <CardHeader className="pb-2">
-          <CardTitle className="text-lg font-medium">Total Applications</CardTitle>
+        <CardHeader>
+          <CardTitle>Approval Rate</CardTitle>
+          <CardDescription>
+            Overall loan approval percentage: {data.approval_rate}%
+          </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="text-3xl font-bold">
-            {formatNumber(analysisData.total_applications)}
-          </div>
-          <p className="text-muted-foreground text-sm mt-1">
-            {analysisData.approval_rate.toFixed(1)}% approval rate
-          </p>
+          <ResponsiveContainer width="100%" height={200}>
+            <PieChart>
+              <Pie
+                data={pieData}
+                cx="50%"
+                cy="50%"
+                labelLine={false}
+                outerRadius={80}
+                fill="#8884d8"
+                dataKey="value"
+                nameKey="name"
+                label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(1)}%`}
+              >
+                {pieData.map((entry, index) => (
+                  <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                ))}
+              </Pie>
+              <Tooltip formatter={(value) => Math.round(Number(value))} />
+              <Legend />
+            </PieChart>
+          </ResponsiveContainer>
         </CardContent>
       </Card>
 
       <Card className="dashboard-card">
-        <CardHeader className="pb-2">
-          <CardTitle className="text-lg font-medium">Average Approved Income</CardTitle>
+        <CardHeader>
+          <CardTitle>Home Ownership Impact</CardTitle>
+          <CardDescription>
+            Approval rates by home ownership status
+          </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="text-3xl font-bold">${formatNumber(getAverageIncome())}</div>
-          <p className="text-muted-foreground text-sm mt-1">
-            For approved applications
-          </p>
+          <ResponsiveContainer width="100%" height={200}>
+            <BarChart data={homeOwnershipData}>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="name" />
+              <YAxis tickFormatter={(value) => `${value}%`} />
+              <Tooltip formatter={(value) => `${Number(value).toFixed(1)}%`} />
+              <Legend />
+              <Bar dataKey="approved" name="Approved" fill="#0088FE" />
+              <Bar dataKey="declined" name="Declined" fill="#FF8042" />
+            </BarChart>
+          </ResponsiveContainer>
         </CardContent>
       </Card>
 
       <Card className="dashboard-card">
-        <CardHeader className="pb-2">
-          <CardTitle className="text-lg font-medium">
-            Average Loan Amount
-          </CardTitle>
+        <CardHeader>
+          <CardTitle>Previous Defaults Impact</CardTitle>
+          <CardDescription>
+            Approval rates by previous defaults status
+          </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="text-3xl font-bold">
-            ${formatNumber(getAverageLoanAmount())}
-          </div>
-          <p className="text-muted-foreground text-sm mt-1">
-            For approved applications
-          </p>
+          <ResponsiveContainer width="100%" height={200}>
+            <BarChart data={defaultsData}>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="name" />
+              <YAxis tickFormatter={(value) => `${value}%`} />
+              <Tooltip formatter={(value) => `${Number(value).toFixed(1)}%`} />
+              <Legend />
+              <Bar dataKey="approved" name="Approved" fill="#0088FE" />
+              <Bar dataKey="declined" name="Declined" fill="#FF8042" />
+            </BarChart>
+          </ResponsiveContainer>
         </CardContent>
       </Card>
 
       <Card className="dashboard-card">
-        <CardHeader className="pb-2">
-          <CardTitle className="text-lg font-medium">
-            Credit Score Impact
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="text-3xl font-bold">
-            {analysisData.credit_score_distribution?.approved?.mean
-              ? analysisData.credit_score_distribution.approved.mean.toFixed(0)
-              : "N/A"}
-          </div>
-          <p className="text-muted-foreground text-sm mt-1">
-            Average credit score (approved)
-          </p>
-        </CardContent>
-      </Card>
-
-      {/* Charts */}
-      <Card className="col-span-1 md:col-span-2">
         <CardHeader>
           <CardTitle>Credit Score Distribution</CardTitle>
+          <CardDescription>
+            Approval rates by credit score range
+          </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="h-80">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={prepareCreditScoreData()} barGap={4}>
-                <XAxis dataKey="name" />
-                <YAxis />
-                <Tooltip formatter={(value) => formatNumber(value as number)} />
-                <Legend />
-                <Bar
-                  dataKey="Approved"
-                  fill={COLORS.approved}
-                  name="Approved"
-                />
-                <Bar
-                  dataKey="Declined"
-                  fill={COLORS.declined}
-                  name="Declined"
-                />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Approval by Home Ownership</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="h-64">
-            <ResponsiveContainer width="100%" height="100%">
-              <PieChart>
-                <Pie
-                  data={prepareOwnershipData()}
-                  cx="50%"
-                  cy="50%"
-                  labelLine={false}
-                  outerRadius={80}
-                  fill="#8884d8"
-                  dataKey="value"
-                  nameKey="name"
-                  label={({ name, value }) => `${name}: ${value.toFixed(1)}%`}
-                >
-                  {prepareOwnershipData().map((entry, index) => (
-                    <Cell
-                      key={`cell-${index}`}
-                      fill={
-                        Object.values(COLORS)[
-                          index % Object.values(COLORS).length
-                        ]
-                      }
-                    />
-                  ))}
-                </Pie>
-                <Tooltip formatter={(value) => `${value.toFixed(1)}%`} />
-                <Legend />
-              </PieChart>
-            </ResponsiveContainer>
-          </div>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Approval by Previous Defaults</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="h-64">
-            <ResponsiveContainer width="100%" height="100%">
-              <PieChart>
-                <Pie
-                  data={[
-                    {
-                      name: "No Defaults",
-                      value:
-                        analysisData.approval_by_defaults["no"]?.["Approved"] ||
-                        0,
-                    },
-                    {
-                      name: "Has Defaults",
-                      value:
-                        analysisData.approval_by_defaults["yes"]?.["Approved"] ||
-                        0,
-                    },
-                  ]}
-                  cx="50%"
-                  cy="50%"
-                  labelLine={false}
-                  outerRadius={80}
-                  fill="#8884d8"
-                  dataKey="value"
-                  nameKey="name"
-                  label={({ name, value }) => `${name}: ${value.toFixed(1)}%`}
-                >
-                  <Cell fill={COLORS.blue} />
-                  <Cell fill={COLORS.orange} />
-                </Pie>
-                <Tooltip formatter={(value) => `${value.toFixed(1)}%`} />
-                <Legend />
-              </PieChart>
-            </ResponsiveContainer>
-          </div>
+          <ResponsiveContainer width="100%" height={200}>
+            <BarChart data={creditScoreData}>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="name" />
+              <YAxis />
+              <Tooltip />
+              <Legend />
+              <Bar dataKey="approved" name="Approved" fill="#0088FE" />
+              <Bar dataKey="declined" name="Declined" fill="#FF8042" />
+            </BarChart>
+          </ResponsiveContainer>
         </CardContent>
       </Card>
     </div>
